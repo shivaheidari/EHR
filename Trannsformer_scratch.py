@@ -18,8 +18,8 @@ ensure that the positional encoding matrix is not too large'''
 '''d_model is the dimension of the model, it is the number of expected features in the input'''
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_len = 5000):
-        super(PositionalEncoding, self).__init__()
+    def _init_(self, d_model, max_len = 5000):
+        super(PositionalEncoding, self)._init_()
         self.dropout = nn.Dropout(p=0.1)
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
@@ -35,7 +35,7 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
         
-def sclaed_dot_product_attention(query, key, value, mask=None):
+def scaled_dot_product_attention(query, key, value, mask=None):
     d_k = query.size(-1)
     scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
     if mask is not None:
@@ -45,8 +45,8 @@ def sclaed_dot_product_attention(query, key, value, mask=None):
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_model, num_heads):
-        super(MultiHeadAttention, self).__init__()
+    def _init_(self, d_model, num_heads):
+        super(MultiHeadAttention, self)._init_()
         self.d_model = d_model
         self.num_heads = num_heads
         self.d_k = d_model // num_heads
@@ -62,16 +62,16 @@ class MultiHeadAttention(nn.Module):
             #-1 automatically determines the size of the dimension
             #transpose from [batch_size, seq_len, num_heads, d_k] to [batch_size, num_heads, seq_len, d_k]
             return x.view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
-        query, key, vlaue = [transform(l(x)) for l, x in zip([self.query, self.key, self.value], (query, key, value))]
-        x, attention_weights = sclaed_dot_product_attention(query, key, value, mask)
+        query, key, value = [transform(l(x)) for l, x in zip([self.query, self.key, self.value], (query, key, value))]
+        x, attention_weights = scaled_dot_product_attention(query, key, value, mask)
         x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model)
         return self.out(x)
 
 
 #feed forward neural network
 class FeedForward(nn.Module):
-    def __init__(self, d_model, d_ff=2048, dropout=0.1):
-        super(FeedForward, self).__init__()
+    def _init_(self, d_model, d_ff=2048, dropout=0.1):
+        super(FeedForward, self)._init_()
         self.linear_1 = nn.Linear(d_model, d_ff)
         self.dropout = nn.Dropout(dropout)
         self.linear_2 = nn.Linear(d_ff, d_model)
@@ -81,8 +81,8 @@ class FeedForward(nn.Module):
     
 #encoder layer
 class EncoderLayer(nn.Module):
-    def __init__(self, d_model, num_heads, d_ff, dropout=0.1):
-        super(EncoderLayer, self).__init__()
+    def _init_(self, d_model, num_heads, d_ff, dropout=0.1):
+        super(EncoderLayer, self)._init_()
         self.multi_head_attention = MultiHeadAttention(d_model, num_heads)
         self.feed_forward = FeedForward(d_model)
         self.layer_norm_1 = nn.LayerNorm(d_model)
@@ -95,12 +95,12 @@ class EncoderLayer(nn.Module):
         x = self.layer_norm_1(x)
         ff_output = self.feed_forward(x)
         x = x + self.dropout(ff_output)
-        return self.norm_2(x)
+        return self.layer_norm_2(x)
 #combine encoder layers to form the encoder
 
 class Encoder(nn.Module):
-    def __init__(self, num_layers, d_model, num_heads, d_ff, input_vocab_size, max_len, dropout=0.1):
-        super(Encoder, self).__init__()
+    def _init_(self, num_layers, d_model, num_heads, d_ff, input_vocab_size, max_len, dropout=0.1):
+        super(Encoder, self)._init_()
         self.embedding = nn.Embedding(input_vocab_size, d_model)
         self.positional_encoding = PositionalEncoding(d_model, max_len)
         self.layers = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff, dropout) for _ in range(num_layers)])
@@ -114,8 +114,8 @@ class Encoder(nn.Module):
         return x
 
 class Transformer (nn.Module):
-    def __init__(self, num_layers, d_model, num_heads, d_ff, input_vocab_size, max_len, output_vocab_size, dropout=0.1):
-        super(Transformer, self).__init__()
+    def _init_(self, num_layers, d_model, num_heads, d_ff, input_vocab_size, max_len, output_vocab_size, dropout=0.1):
+        super(Transformer, self)._init_()
         self.encoder = Encoder(num_layers, d_model, num_heads, d_ff, input_vocab_size, max_len, dropout)
         self.fc_out = nn.Linear(d_model, output_vocab_size)
     def forward(self, src, src_mask=None):
