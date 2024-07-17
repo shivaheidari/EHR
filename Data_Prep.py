@@ -7,11 +7,13 @@ from sqlalchemy import text
 #password: root
 engine = create_engine("mysql+pymysql://root:root@localhost:3306/MIMIC")
 
+
+
+
 with engine.connect() as conn:
-    query = text ("SELECT count(*) FROM MIMIC.ADMISSIONS;")
+    query = text ("SELECT count(*) FROM MIMIC.d_icd_diagnoses where SHORT_TITLE like '%dementia%';")
     result = conn.execute(query)
     count = result.fetchone()[0]
-    print("number of admissions: ", count)
-    # for row in result:
-    #     print(row)
+    print("number of demenita diagnoses: ", count)
 
+#select ICDcodes 290.0 to 
