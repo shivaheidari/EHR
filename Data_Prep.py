@@ -2,6 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy import URL
 from sqlalchemy import text
 import pandas as pd
+import json 
+import csv
 #hostname: 127.0.0.1
 #port = 3306
 #username: root
@@ -12,11 +14,12 @@ engine = create_engine("mysql+pymysql://root:root@localhost:3306/MIMIC")
 #MIMIC Data admissions
 
 
-with engine.connect() as conn:
-    query = text ("SELECT MIMIC.ehrs.ROW_ID, MIMIC.ehrs.SUBJECT_ID, MIMIC.ehrs.HADM_ID, MIMIC.ehrs.CHARTDATE, MIMIC.ehrs.STORETIME, MIMIC.ehrs.CATEGORY, MIMIC.ehrs.DESCRIPTION, MIMIC.ehrs.CGID, MIMIC.ehrs.ISERROR, MIMIC.ehrs.TEXT, MIMIC.diagnoses_icd.SUBJECT_ID from MIMIC.ehrs,MIMIC.diagnoses_icd WhERE MIMIC.diagnoses_icd.SUBJECT_ID = MIMIC.ehrs.SUBJECT_ID")
-    result = conn.execute(query)
-    count = result.fetchone()[0]
-    print("results", count)
+# with engine.connect() as conn:
+#     query = text ("create table ehrs_diag as SELECT MIMIC.ehrs.ROW_ID, MIMIC.ehrs.SUBJECT_ID, MIMIC.ehrs.DESCRIPTION, MIMIC.ehrs.TEXT from MIMIC.ehrs   INNER JOIN MIMIC.diagnoses_icd on MIMIC.diagnoses_icd.SUBJECT_ID = MIMIC.ehrs.SUBJECT_ID")
+#     result = conn.execute(query)
+#     print("table created")
+#     count = result.fetchone()[0]
+#     print("results", count)
 
 #select patinets with dementia
 
@@ -29,3 +32,8 @@ with engine.connect() as conn:
 #     chunk = chunk.drop(chunk.columns[0], axis=1)
 #     chunk.to_sql('ehrs', con=engine, if_exists='append', index=False)
 #     print("chunk",i," added to database")
+
+
+
+data = pd.read_csv("../ehr_subject_icd9/ehricdjs.csv")
+print(data.head())
